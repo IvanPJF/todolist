@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>To-do list</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            initItems();
+            $("#show_all").change(function () {
+                $(":checkbox:checked").parents("tr").toggle();
+            });
+        });
+
+        function initItems() {
+            $.ajax({
+                url: "items",
+                type: "GET"
+            }).done(function (data) {
+                let items = JSON.parse(data);
+                $("#tbody").html(function () {
+                    let body = "";
+                    items.forEach(function (item, index, array) {
+                        body = itemToTableRow(body, item);
+                    });
+                    return body;
+                });
+                hideRows($(":checkbox:checked"));
+            });
+        }
+
+        function itemToTableRow(body, item) {
+            let id = item.id;
+            return `${body}`
+                + `<tr>`
+                + `<td>${item.description}</td>`
+                + `<td>${new Date(item.created)}</td>`
+                + `<td><input type="checkbox" id="chbox${id}" ${item.done ? "checked" : ""} onchange="changeDone(${id});"></td>`
+                + `</tr>`;
+        }
+
+        function hideRows(element) {
+            element.parents("tr").hide();
+        }
+
+        function changeDone(id) {
+            let elem = $(`#chbox${id}`);
+            let checked = elem.prop("checked");
+            if (checked && !$("#show_all").prop("checked")) {
+                hideRows(elem);
+            }
+            $.ajax({
+                url: "items",
+                type: "POST",
+                data: {
+                    "action": "changeDone",
+                    "item": JSON.stringify({
+                        "id": id,
+                        "done": checked
+                    })
+                }
+            });
+        }
+
+        function validate(element) {
+            if (element.val().match(/^\s*$/)) {
+                alert(element.attr('title'));
+                return false;
+            }
+            return true;
+        }
+
+        function addItem() {
+            let textArea = $('#desc');
+            if (validate(textArea)) {
+                $.ajax({
+                    url: "items",
+                    type: "POST",
+                    data: {
+                        "action": "add",
+                        "item": JSON.stringify({
+                            "description": textArea.val()
+                        })
+                    }
+                }).done(function (data) {
+                    let newItem = JSON.parse(data);
+                    if (newItem.id) {
+                        $('#table tr:last').after(
+                            itemToTableRow("", newItem)
+                        );
+                    }
+                });
+            }
+            textArea.val("");
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <div class="pt-2">
+        <h5>Add new task</h5>
+        <form>
+            <div class="form-group row">
+                <div class="col-6">
+                    <label for="desc">Description:</label>
+                    <textarea style="resize: none;" class="form-control" id="desc" placeholder="Describe the task"
+                              name="description" title="Describe the task" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <button type="button" class="btn btn-default"
+                            onclick="addItem();">Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row justify-content-end pt-3">
+        <div class="col-4 text-center">
+            <h3>Task list</h3>
+        </div>
+        <div class="col-4 text-right">
+            <label for="show_all">Show all</label>
+            <input type="checkbox" id="show_all"/>
+        </div>
+    </div>
+    <div class="table-responsive table-bordered">
+        <table class="table" id="table" style="word-break: break-all">
+            <thead class="thead-light">
+            <tr>
+                <th style="width: 50%">Description</th>
+                <th style="width: 40%">Created date</th>
+                <th style="width: 10%">Done</th>
+            </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
