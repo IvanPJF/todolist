@@ -12,4 +12,5 @@ public interface Service {
 
     void changeDone(Item item);
 
+    boolean delete(Item item);
 }

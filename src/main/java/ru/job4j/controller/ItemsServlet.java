@@ -33,9 +33,24 @@ public class ItemsServlet extends HttpServlet {
         String itemJSON = req.getParameter("item");
         ObjectMapper jsonMapper = new ObjectMapper();
         Item item = jsonMapper.readValue(itemJSON, Item.class);
+        if ("delete".equals(action)) {
+            req.setAttribute("itemForDelete", item);
+            doDelete(req, resp);
+            return;
+        }
         DISPATCHER.send(action, SERVICE, item);
         try (final PrintWriter writer = resp.getWriter()) {
             jsonMapper.writeValue(writer, item);
         }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Item item = (Item) req.getAttribute("itemForDelete");
+        if (!SERVICE.delete(item)) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }

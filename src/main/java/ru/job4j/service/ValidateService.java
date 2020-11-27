@@ -32,4 +32,9 @@ public class ValidateService implements Service {
     public void changeDone(Item item) {
         STORE.changeDone(item);
     }
+
+    @Override
+    public boolean delete(Item item) {
+        return STORE.delete(item);
+    }
 }

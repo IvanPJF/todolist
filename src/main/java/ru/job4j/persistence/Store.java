@@ -11,4 +11,6 @@ public interface Store {
     Item add(Item item);
 
     void changeDone(Item item);
+
+    boolean delete(Item item);
 }

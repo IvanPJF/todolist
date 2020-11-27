@@ -8,6 +8,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.model.Item;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class HiberStore implements Store {
@@ -41,6 +42,18 @@ public class HiberStore implements Store {
                 .setParameter("newDone", item.isDone())
                 .setParameter("id", item.getId())
                 .executeUpdate());
+    }
+
+    @Override
+    public boolean delete(Item item) {
+        return execute(session -> {
+            Item findItem = session.get(Item.class, item.getId());
+            if (Objects.isNull(findItem)) {
+                return false;
+            }
+            session.remove(findItem);
+            return true;
+        });
     }
 
     private <T> T execute(Function<Session, T> function) {

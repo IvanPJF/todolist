@@ -41,10 +41,11 @@
         function itemToTableRow(body, item) {
             let id = item.id;
             return `${body}`
-                + `<tr>`
+                + `<tr id="row${id}">`
                 + `<td>${item.description}</td>`
-                + `<td>${new Date(item.created)}</td>`
+                + `<td>${new Date(item.created).toLocaleString()}</td>`
                 + `<td><input type="checkbox" id="chbox${id}" ${item.done ? "checked" : ""} onchange="changeDone(${id});"></td>`
+                + `<td><input type="button" class="btn btn-default btn-sm" value="&#10060;" onclick="deleteItem(${id});"></td>`
                 + `</tr>`;
         }
 
@@ -69,6 +70,27 @@
                     })
                 }
             });
+        }
+
+        function deleteItem(id) {
+            $.ajax({
+                url: "items",
+                type: "POST",
+                data: {
+                    "action": "delete",
+                    "item": JSON.stringify({
+                        "id": id
+                    })
+                }
+            }).done(function () {
+                deleteRow($(`#row${id}`));
+            }).fail(function () {
+                alert(`Task with ${id} don't deleted`);
+            });
+        }
+
+        function deleteRow(element) {
+            element.remove();
         }
 
         function validate(element) {
@@ -140,8 +162,9 @@
             <thead class="thead-light">
             <tr>
                 <th style="width: 50%">Description</th>
-                <th style="width: 40%">Created date</th>
+                <th style="width: 30%">Created date</th>
                 <th style="width: 10%">Done</th>
+                <th style="width: 10%">Delete</th>
             </tr>
             </thead>
             <tbody id="tbody"></tbody>
