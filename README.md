@@ -6,7 +6,7 @@ Simple todo app
 
 # About the project
 
-#### Technologies:
+### Technologies:
 + PostgreSQL
 + Jackson
 + Servlet 4.0
@@ -15,19 +15,20 @@ Simple todo app
 + JQuery
 + HTML
 
-#### App interface
+### App interface
 
 + __Main app space__
 
-![main](images/main_page.png "Main")
+<kbd>![main](images/main_page.png "Main")
 
 + __Add a new task__
 
-![add](images/add_task.png "Add")
+<kbd>![add](images/add_task.png "Add")
 
 + __Show all tasks__
 
-![all](images/all_show_tasks.png "All")
+<kbd>![all](images/all_show_tasks.png "All")
+
 
 # Deployment
 
